@@ -1,6 +1,7 @@
-.word {
-    font-size: 42px;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .incorrect-word::after {
     content: '';
     position: absolute;

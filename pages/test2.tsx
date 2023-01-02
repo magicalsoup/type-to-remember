@@ -44,7 +44,7 @@ export default function Home() {
     }, [])
   );
   const [getText, setText] = useState(
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", width:"600px"}}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", width:"600px"}}>
       {typedWords.map((wordData, idx) => {
         return getWord(
           wordData.word,
@@ -158,7 +158,7 @@ export default function Home() {
         };
 
         setText(
-        <div style={{ display: "flex",  flexWrap: "wrap",  gap: "5px", width:"600px"}}>
+        <div style={{ display: "flex",  flexWrap: "wrap",  gap: "10px", width:"600px"}}>
             {typedWords.map((wordData, idx) => {
               return getWord(
                 wordData.word,
@@ -246,13 +246,14 @@ export default function Home() {
           flexDirection: "column",
         }}
       >
-        <div>active word: {activeWord}</div>
+        <div className="font-raleway">Type to Remember</div>
+        <div className="font-raleway font-bold">Active word: {activeWord}</div>
         <div>actual word: {WORDS[index]}</div>
         <div>{index}</div>
         <div>
           Correctwords: {correctWordCount} | Time: {timeInSeconds}s
         </div>
-        <div>{getText}</div>
+        <div className="font-robotomono">{getText}</div>
       </div>
     );
   } else {
