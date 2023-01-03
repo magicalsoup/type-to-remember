@@ -43,3 +43,19 @@ export function isAllowedCharacter(s: string) {
     if (s.length !== 1) return false;
     return s[0] >= `!` && s[0] <= `~`;
 };
+
+export function getPracticeList(array: {title:string; text:string}[]) {
+    let result = array;
+    for(let i=result.length-1; i>=0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = result[j];
+        result[j] = result[i];
+        result[i] = tmp;
+    }
+    return result.slice(0, 3);
+}
+
+export function getAccuracy(attemptedCount:number, correctWordCount: number
+) {
+    return Math.ceil(correctWordCount / attemptedCount * 100);
+}
