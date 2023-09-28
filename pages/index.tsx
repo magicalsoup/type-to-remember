@@ -7,7 +7,7 @@ export default function Home() {
 
   const [textArray, setTextArray] = useState<{title:string; text:string}[]>([]);
   const TOTAL_TEXTS = 3;
-  const TOTAL_TIME = 30;
+  const TOTAL_TIME = 60;
   const INCORRECT_CHAR_COLOR = "text-rose-500";
   const CORRECT_CHAR_COLOR = "text-emerald-800";
   const DEFAULT_CHAR_COLOR = "text-gray-500";
@@ -62,12 +62,14 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeInSeconds((prevSecond) => {
-        if (prevSecond === 0 || !gameStart) return prevSecond;
+        if (prevSecond === 0 || !gameStart || gameFinished) {
+          return prevSecond;
+        }
         return prevSecond - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameStart]);
+  }, [gameStart, gameFinished]);
 
 
   useEffect(() => {
@@ -249,9 +251,9 @@ export default function Home() {
   function getTextComponent(textData: {title:string; text:string}[]) {
     return (
       <div className="flex flex-col gap-[20px]">
-      {textArray && textArray.map(({title, text}, index) => 
+      {textData && textData.map(({title, text}, index) => 
         <div className="flex flex-col" key={index}>
-          <div className="font-raleway font-medium text-2xl bg-amber-100 w-fit">{title}</div>
+          <div className="font-raleway font-medium text-2xl w-fit">{title}</div>
           <div className="flex flex-wrap gap-[10px] font-robotomono text-2xl">
             {typedWords[index] && typedWords[index].map((wordData, idx) => {
               return getWord(
@@ -271,10 +273,13 @@ export default function Home() {
 
   if (!gameFinished) {
     return (
-      <div className="flex flex-col justify-between items-center w-full h-screen bg-orange-100 select-none">
-        <div className="flex flex-col w-[800px] pt-20">
+      <div className="flex flex-col justify-between items-center w-full h-screen select-none">
+        <div className="flex flex-col w-[800px] pt-20 gap-y-3">
           <div className="font-raleway text-4xl">
             Type to Remember
+          </div>
+          <div className="font-raleway pl-1">
+            start typing to begin
           </div>
         </div>
         <div className="flex flex-col">
@@ -285,11 +290,14 @@ export default function Home() {
       </div>
     );
   } else {
-    return <Results 
+    
+    return <>
+      <Results 
               correctWordCount={correctWordCount}
               timeTakenInSeconds={TOTAL_TIME - timeInSeconds}
               accuracy={getAccuracy(attemptedCount, correctWordCount)}
               texts={textArray}
             />;
+        </>
   }
 }

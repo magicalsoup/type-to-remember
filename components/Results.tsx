@@ -9,12 +9,11 @@ export default function Results({correctWordCount, timeTakenInSeconds, accuracy,
     }[];
 }) {
     // need total words typed
-
     // console.log(correctWordCount);
     // console.log(timeTakenInSeconds);
     const wordsPerMinute = Math.ceil((correctWordCount? correctWordCount : 0) / (timeTakenInSeconds / 60.0));
     return (
-        <div className="flex flex-col justify-center items-center h-screen w-full bg-orange-100">
+        <div className="flex flex-col justify-center items-center h-screen w-full">
             <div className="flex flex-col w-3/5 max-w-[1284px] gap-y-16">
                 <div className="font-raleway text-4xl">
                     Your Results
