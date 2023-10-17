@@ -2,11 +2,14 @@ import { useEffect, useState,} from "react";
 import Results from "../components/Results";
 import { TEXT_DATA } from "../public/TEXT_DATA";
 import { getAccuracy, getCharacterInformation, getLastMatchedIndex, getPracticeList, isAllowedCharacter } from "../lib/logic";
+import { Card } from "../components/StudyCards/CardsContext";
+
+const userPracticeListName = "userPracticeList"
 
 export default function Home() {
 
   const [textArray, setTextArray] = useState<{title:string; text:string}[]>([]);
-  const TOTAL_TEXTS = 3;
+  const [totalTexts, setTotalTexts] = useState<number>(-1);
   const TOTAL_TIME = 60;
   const INCORRECT_CHAR_COLOR = "text-rose-500";
   const CORRECT_CHAR_COLOR = "text-emerald-800";
@@ -34,8 +37,21 @@ export default function Home() {
   }[][]>([]);
 
   useEffect(() => {
-    const curTextArray = getPracticeList(TEXT_DATA);
+    let curTextArray = getPracticeList(TEXT_DATA);
+    if (typeof localStorage !== "undefined") {
+      if (localStorage.getItem(userPracticeListName)) {
+        const cards = JSON.parse(localStorage.getItem(userPracticeListName) as string);
+        console.log("got user cached words", cards);
+        curTextArray = getPracticeList(cards.map((card: Card) => {
+          return {title: card.title, text: card.text}}));
+      }
+    }
+
+    if (curTextArray.length === 0) {
+      curTextArray = getPracticeList(TEXT_DATA);
+    }
     setTextArray(curTextArray);
+    setTotalTexts(curTextArray.length);
     setText(getTextComponent(curTextArray));
     setTypedWords(() => {
       let result: { word: string; correctWord: string; lastMatchedIndex: number; isActive: boolean; }[][] = [];
@@ -54,11 +70,11 @@ export default function Home() {
       })
       return result;
     });
-
-  }, []);
+  },[]);
 
   const [getText, setText] = useState(getTextComponent(textArray));
-
+ 
+  // countdown
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeInSeconds((prevSecond) => {
@@ -86,7 +102,7 @@ export default function Home() {
   }, [index, timeInSeconds, activeWord]);
 
   useEffect(() => {
-    if(gameIndex === TOTAL_TEXTS || timeInSeconds === 0) {
+    if(gameIndex === totalTexts || timeInSeconds === 0) {
       setGameFinished(true);
     }
   }, [timeInSeconds, gameIndex]);
@@ -94,6 +110,9 @@ export default function Home() {
   // handle when user presses keys
   useEffect(() => {
     const keyDownHandler = (event: KeyboardEvent) => {
+      if (totalTexts <= 0) { // should not do anything if there are no texts
+        return;
+      }
       if (event.key === "Backspace") {
         // backspace
         setActiveWord((prevText) => prevText.slice(0, -1));
@@ -117,7 +136,7 @@ export default function Home() {
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
     };
-  }, []);
+  }, [totalTexts]);
 
   useEffect(() => {
     if (
@@ -151,9 +170,12 @@ export default function Home() {
         return prevTypedWords;
       });
 
-      setIndex((prevIndex) => prevIndex + 1);
       setActiveWord("");
     }
+    if (activeWord.length > 0) {
+      setIndex((prevIndex) => prevIndex + 1);
+    }
+   
   }, [spaceCounter]);
 
   // count the number of correct words
@@ -203,9 +225,6 @@ export default function Home() {
       word,
       correctWord,
       matchedToIndex,
-      CORRECT_CHAR_COLOR,
-      INCORRECT_CHAR_COLOR,
-      DEFAULT_CHAR_COLOR
     );
 
     const typedword = word.length >= correctWord.length? correctWord : correctWord.slice(0, word.length);
@@ -213,9 +232,6 @@ export default function Home() {
       word,
       typedword,
       getLastMatchedIndex(word, typedword),
-      CORRECT_CHAR_COLOR,
-      INCORRECT_CHAR_COLOR,
-      DEFAULT_CHAR_COLOR
     )
 
     const isCorrect =
@@ -282,10 +298,10 @@ export default function Home() {
             start typing to begin
           </div>
         </div>
-        <div className="flex flex-col">
+        {totalTexts > 0 && <div className="flex flex-col min-h-[368px]">
           <div className="font-raleway text-xl text-lime-900 font-bold">Time: {timeInSeconds}</div>
           <div className="w-[800px] ">{getText}</div>
-        </div>
+        </div>}
         <div>{/**Empty div*/}</div>
       </div>
     );
