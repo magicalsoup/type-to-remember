@@ -1,5 +1,5 @@
-import { Card } from "../components/StudyCards/CardsContext";
-import { TEXT_DATA } from "../public/TEXT_DATA";
+import { TypeStatistic } from "../components/TypeText/MultiTextContext";
+import { TypedWord } from "../components/TypeText/TypeText";
 
 const INCORRECT_CHAR_COLOR = "text-rose-500";
 const CORRECT_CHAR_COLOR = "text-emerald-800";
@@ -49,6 +49,7 @@ export function isAllowedCharacter(s: string) {
     return s[0] >= `!` && s[0] <= `~`;
 }
 
+// deprecated
 export function getAccuracy(attemptedCount:number, correctWordCount: number) {
     return Math.ceil(correctWordCount / attemptedCount * 100);
 }
@@ -62,4 +63,47 @@ export function getPracticeList(array: {title:string; text:string}[]) {
         result[i] = tmp;
     }
     return result.slice(0, 3);
+}
+
+export function getTypeStatistic(typedWords: TypedWord[]) {
+    let attempts = 0;
+    let correct = 0; 
+
+    for (let i = 0; i < typedWords.length; i++) {
+        if (!typedWords[i].word || !typedWords[i].correctWord) continue;
+        if (typedWords[i].word === typedWords[i].correctWord) correct++;
+        attempts++;
+    }
+
+    return {
+        correctWordsTyped: correct,
+        attemptedWordsTyped: attempts
+    }
+}
+
+export function getCorrectWordCount(typeStatistcs: TypeStatistic[]) {
+    let totalCorrectWords = 0;
+    typeStatistcs.forEach((stat) => totalCorrectWords += stat.correctWordsTyped);
+    return totalCorrectWords;
+}
+
+export function getTypingAccuracy(typeStatistcs: TypeStatistic[]) {
+    let totalCorrectWords = 0;
+    let totalAttemptedWords = 0;
+    typeStatistcs.forEach((stat) => {
+        totalCorrectWords += stat.correctWordsTyped;
+        totalAttemptedWords += stat.attemptedWordsTyped;
+    })
+    return totalAttemptedWords === 0? 100 : totalCorrectWords / totalCorrectWords * 100;
+}
+
+// words per minute
+export function getWPM(correctWordCount: number, timeTakenInMS: number | null) {
+    if (timeTakenInMS === null) {
+        return "Nan";
+    }
+    const MS_IN_A_SEC = 1000;
+    const SEC_IN_A_MIN = 60;
+    const MS_IN_A_MINUTE = SEC_IN_A_MIN * MS_IN_A_SEC;
+    return Math.ceil(correctWordCount / (timeTakenInMS / MS_IN_A_MINUTE));
 }

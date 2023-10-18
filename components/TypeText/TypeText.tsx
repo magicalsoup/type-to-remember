@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { getLastMatchedIndex, isAllowedCharacter } from "../../lib/logic";
+import { getLastMatchedIndex, getTypeStatistic, isAllowedCharacter } from "../../lib/logic";
 import Text from "./Text";
-import { useMultiTextDispatch, useMultiTextState } from "./MultiTextContext";
+import { MultiTextContextActionTypes, useMultiTextDispatch, useMultiTextState } from "./MultiTextContext";
 
 export interface TypedWord {
     word: string;
     correctWord: string;
     lastMatchedIndex: number;
     isActive: boolean;
+}
+
+const enum TextStateActionTypes {
+    BACKSPACE,
+    SPACE,
+    ADD_LETTER
 }
 
 interface TextState {
@@ -18,7 +24,7 @@ interface TextState {
 }
 
 interface TextStateAction {
-    type: string;
+    type: TextStateActionTypes;
     newCharacter?: string;
 }
 
@@ -54,19 +60,19 @@ export default function TypeText({title, text, curTextIndex} :
     const [textComponent, setTextComponent] = 
         useState(<Text typedWords={initialTypedWords} wordIndex={textState.wordIndex} textIsActive={curTextIndex === multiTextState.textIndex}/>);
 
-    function typedWordsReducer(textState: TextState, action: TextStateAction) {
-        const {typedWords, wordIndex, lastCorrectWordIndex, activeWord } = textState;
-        if (curTextIndex !== multiTextState.textIndex) { // not our turn, we should not do anything
-            return textState;
-        }
-        if (wordIndex >= typedWords.length) { // should not do anything, we are done
-            return textState;
+    function typedWordsReducer(oldTextState: TextState, action: TextStateAction) {
+        const {typedWords: oldTypedWords, wordIndex: oldWordIndex, 
+            lastCorrectWordIndex: oldLastCorrectWordIndex, activeWord: oldActiveWord } = oldTextState;
+
+        if (curTextIndex !== multiTextState.textIndex || oldWordIndex >= oldTypedWords.length) { // not our turn, we should not do anything
+            return oldTextState;
         }
         switch(action.type) {
-            case "backspace": {
-                if (wordIndex > 0 && wordIndex - 1 >= lastCorrectWordIndex && activeWord === "") {
-                    const newTypedWords: TypedWord[] = typedWords.map((word, index) => {
-                        if (index === wordIndex) {
+            case TextStateActionTypes.BACKSPACE: {
+                // if we are at the beginning of some word (but not the very first)
+                if (oldWordIndex > 0 && oldWordIndex - 1 >= oldLastCorrectWordIndex && oldActiveWord === "") {
+                    const newTypedWords: TypedWord[] = oldTypedWords.map((word, index) => {
+                        if (index === oldWordIndex) {
                             return {
                                 word: "",
                                 correctWord: word.correctWord,
@@ -74,11 +80,9 @@ export default function TypeText({title, text, curTextIndex} :
                                 isActive: false,
                             }
                         }
-                        if (index === wordIndex - 1) {
+                        if (index === oldWordIndex - 1) {
                             return {
-                                word: word.word,
-                                correctWord: word.correctWord,
-                                lastMatchedIndex: word.lastMatchedIndex,
+                                ...word,
                                 isActive: true,
                             }
                         }
@@ -86,84 +90,80 @@ export default function TypeText({title, text, curTextIndex} :
                     })
                     return {
                         typedWords: newTypedWords,
-                        wordIndex: wordIndex - 1,
-                        lastCorrectWordIndex: lastCorrectWordIndex,
-                        activeWord: typedWords[textState.wordIndex-1].word
+                        wordIndex: oldWordIndex - 1,
+                        lastCorrectWordIndex: oldLastCorrectWordIndex,
+                        activeWord: oldTypedWords[oldTextState.wordIndex-1].word
                     }
                 }
-                if (activeWord.length > 0) {
-                    const newActiveWord = activeWord.slice(0, -1);
-                    const newTypedWords: TypedWord[] = typedWords.map((word, index) => {
-                      if (index === wordIndex) {
+                if (oldActiveWord.length > 0) { // if we are in a middle of a word
+                    const newActiveWord = oldActiveWord.slice(0, -1);
+                    const newTypedWords: TypedWord[] = oldTypedWords.map((wordData, index) => {
+                      if (index === oldWordIndex) {
                         return {
+                            ...wordData,
                             word: newActiveWord,
-                            correctWord: word.correctWord,
-                            lastMatchedIndex: getLastMatchedIndex(newActiveWord, word.correctWord),
-                            isActive: word.isActive,
+                            lastMatchedIndex: getLastMatchedIndex(newActiveWord, wordData.correctWord),
                         }
                       } 
-                      return word; 
+                      return wordData; 
                     })
                     return {
+                        ...oldTextState,
                         typedWords: newTypedWords,
-                        wordIndex: wordIndex,
-                        lastCorrectWordIndex: lastCorrectWordIndex,
                         activeWord: newActiveWord,
                     }
                 }
-                return textState;
+                return oldTextState;
             }
-            case "space": {
-                if (activeWord === "") { // should do anything if active word is empty
-                    return textState;
+            case TextStateActionTypes.SPACE: {
+                if (oldActiveWord === "") { // should do anything if active word is empty
+                    return oldTextState;
                 }
                 const newLastCorrectWordIndex = 
-                    activeWord === typedWords[wordIndex].correctWord? lastCorrectWordIndex + 1: lastCorrectWordIndex;
-                const newTypedWords: TypedWord[] = typedWords.map((word, index) => {
-                    if (index === wordIndex) {
+                    oldActiveWord === oldTypedWords[oldWordIndex].correctWord? oldLastCorrectWordIndex + 1: oldLastCorrectWordIndex;
+                const newTypedWords: TypedWord[] = oldTypedWords.map((wordData, index) => {
+                    if (index === oldWordIndex) {
                         return {
-                            word: word.word,
-                            correctWord: word.correctWord,
-                            lastMatchedIndex: word.lastMatchedIndex,
+                            ...wordData,
                             isActive: false,
                         }
                     }
-                    if (index === wordIndex + 1) {
+                    if (index === oldWordIndex + 1) {
                         return {
                             word: "",
-                            correctWord: word.correctWord,
+                            correctWord: wordData.correctWord,
                             lastMatchedIndex: 0,
                             isActive: true,
                         }
                     }
-                    return word;
+                    return wordData;
                 });
 
                 return {
                     typedWords: newTypedWords,
-                    wordIndex: wordIndex + 1,
+                    wordIndex: oldWordIndex + 1,
                     lastCorrectWordIndex: newLastCorrectWordIndex,
                     activeWord: "",
                 }
             }
-            case "add-letter": {
-                const MAX_LENGTH = typedWords[wordIndex].correctWord.length + EXTRA_CHAR_LIMIT;
-                const newActiveWord = (activeWord + action.newCharacter).slice(0, MAX_LENGTH);
-                const newTypedWords: TypedWord[] = typedWords.map((word, index) => {
-                    if (index === wordIndex) {
+            case TextStateActionTypes.ADD_LETTER: {
+                const MAX_LENGTH = oldTypedWords[oldWordIndex].correctWord.length + EXTRA_CHAR_LIMIT;
+                const newActiveWord = (oldActiveWord + action.newCharacter).slice(0, MAX_LENGTH);
+                const newTypedWords: TypedWord[] = oldTypedWords.map((wordData, index) => {
+                    if (index === oldWordIndex) {
                         return {
+                            ...wordData,
                             word: newActiveWord,
-                            correctWord: word.correctWord,
-                            lastMatchedIndex: getLastMatchedIndex(newActiveWord, word.correctWord),
+                            lastMatchedIndex: getLastMatchedIndex(newActiveWord, wordData.correctWord),
                             isActive: true,
                         }
                     }
-                    return word;
+                    return wordData;
                 });
                 return {
                     typedWords: newTypedWords,
-                    wordIndex: wordIndex,
-                    lastCorrectWordIndex: lastCorrectWordIndex,
+                    wordIndex: oldWordIndex,
+                    lastCorrectWordIndex: oldLastCorrectWordIndex,
                     activeWord: newActiveWord,
                 }
             }
@@ -173,45 +173,55 @@ export default function TypeText({title, text, curTextIndex} :
         }
     }
 
+    // whenever we make a change, we should update the type statistics
+    useEffect(() => {
+        multiTextDispatch({
+            type: MultiTextContextActionTypes.UPDATE_TYPE_STATISTICS,
+            typeStatistic: getTypeStatistic(textState.typedWords),
+        });
+    }, [textState.typedWords]);
+
     // check if we finished the text
     useEffect(() => {
         if (textState.wordIndex >= initialTypedWords.length || 
             (textState.wordIndex === textState.typedWords.length - 1 && 
                 textState.activeWord === textState.typedWords[textState.typedWords.length - 1].correctWord)){ // if we go out of bounds
-            multiTextDispatch({ // we are done
-                type: 'done',
-                prevTextIndex: curTextIndex
+            multiTextDispatch({ 
+                type: MultiTextContextActionTypes.NEXT_TEXT,
+                currentTextIndex: curTextIndex,
             });
-
         }
     }, [textState.wordIndex, textState.activeWord, textState.typedWords]);
 
     // update the text component whenever typedWords is changed
     useEffect(() => {
         setTextComponent(<Text typedWords={textState.typedWords} wordIndex={textState.wordIndex} textIsActive={curTextIndex === multiTextState.textIndex}/>)
-    }, [textState.typedWords, multiTextState.textIndex]);
+    }, [textState.typedWords, textState.activeWord, multiTextState.textIndex]);
 
     // listen for keyboard events
     useEffect(() => {
         const keyDownHandler = (event: KeyboardEvent) => {
-          if (text === "") { // should not do anything if there are no words to type
+          if (text === "" ) { // should not do anything if there are no words to type
             return;
           }
           if (event.key === "Backspace") {
-            // backspace
             textStateDispatch({
-                type: "backspace",
+                type: TextStateActionTypes.BACKSPACE,
             })
           } else if (event.key === " ") {
-            // space
             textStateDispatch({
-                type: "space"
+                type: TextStateActionTypes.SPACE
             })
           } else if (isAllowedCharacter(event.key)) {
             textStateDispatch({
-                type: "add-letter",
+                type: TextStateActionTypes.ADD_LETTER,
                 newCharacter: event.key  
-            })
+            });
+            if (!multiTextState.startTyping) { // if we haven't started
+                multiTextDispatch({
+                    type: MultiTextContextActionTypes.START,
+                });
+            }
           }
         };
         document.addEventListener("keydown", keyDownHandler);
