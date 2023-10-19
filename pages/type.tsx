@@ -1,15 +1,16 @@
-import { useEffect, useState,} from "react";
-import Results from "../components/Results";
-import { TEXT_DATA } from "../public/TEXT_DATA";
-import { getPracticeList } from "../lib/logic";
-import { Card } from "../components/StudyCards/CardsContext";
-import TypeText from "../components/TypeText/TypeText";
 import { MultiTextProvider } from "../components/TypeText/MultiTextContext";
+import { MulitTextWrapper } from "../components/TypeText/MultiText";
+import { useEffect, useState } from "react";
+import { Card } from "../components/StudyCards/CardsContext";
+import { getPracticeList } from "../lib/logic";
+import { TEXT_DATA } from "../public/TEXT_DATA";
+import { TextData } from "../components/TypeText/TypeTextSchema";
 
-const userPracticeListName = "userPracticeList"
+const userPracticeListName = "userPracticeList";
 
 export default function Home() {
-    const [textArray, setTextArray] = useState<{title:string; text:string}[]>([]);
+    const [textArray, setTextArray] = useState<TextData[]>([]);
+
     useEffect(() => {
         let curTextArray = getPracticeList(TEXT_DATA);
         if (typeof localStorage !== "undefined") {
@@ -27,28 +28,8 @@ export default function Home() {
     },[]);
 
     return (
-      <div className="flex flex-col justify-between items-center w-full h-screen select-none">
-        <div className="flex flex-col w-[800px] pt-20 gap-y-3">
-          <div className="font-raleway text-4xl">
-            Type to Remember
-          </div>
-          <div className="font-raleway pl-1">
-            start typing to begin
-          </div>
-        </div>
-        <div className="flex flex-col min-h-[368px]">
-          <div className="font-raleway text-xl text-lime-900 font-bold">Time:</div>
-          <MultiTextProvider>
-            
-                {textArray.map((textData, index) => 
-                    <TypeText key={index} text={textData.text} title={textData.title} curTextIndex={index}/>
-                )}
-            
-          </MultiTextProvider>
-          
-        </div>
-        <div>{/**Empty div*/}</div>
-      </div>
+        <MultiTextProvider >
+            <MulitTextWrapper textArray={textArray}/>
+        </MultiTextProvider>
     );
-  
 }

@@ -10,13 +10,14 @@ export default function TypingResults({texts} : {
     const multiTextState = useMultiTextState();
     const typeStatistics = multiTextState.typeStatistics;
     const timeTakenInMS = multiTextState.elapsedTimeInMS;
+    // bug time take inMS is 0,
     const timeTakenInSeconds = timeTakenInMS? Math.round(timeTakenInMS / 1000.0) : 0;
     const correctWordCount = getCorrectWordCount(typeStatistics);
     const accuracy = getTypingAccuracy(typeStatistics);
     const wordsPerMinute = getWPM(correctWordCount, timeTakenInMS);
 
     // need total words typed
-    console.log("[correctWordCount]", correctWordCount);
+    console.log("[correctWordCount] [timeTakeInMs]", correctWordCount, timeTakenInMS);
     // console.log(timeTakenInSeconds);
    
     return (

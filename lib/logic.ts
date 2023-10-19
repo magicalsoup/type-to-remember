@@ -1,17 +1,13 @@
-import { TypeStatistic } from "../components/TypeText/MultiTextContext";
-import { TypedWord } from "../components/TypeText/TypeText";
+import { TypedWord, TypeStatistic } from "../components/TypeText/TypeTextSchema";
+import { CORRECT_CHAR_COLOR, DEFAULT_CHAR_COLOR, INCORRECT_CHAR_COLOR, MS_IN_A_MINUTE } from "./constants";
 
-const INCORRECT_CHAR_COLOR = "text-rose-500";
-const CORRECT_CHAR_COLOR = "text-emerald-800";
-const DEFAULT_CHAR_COLOR = "text-gray-500";
-
-export function getCharacterInformation(typedWord:string, actualWord:string, matchedIndex:number) {
+export function getCharacterInformation(typedWord:string, actualWord:string) {
     let data = [];
     for(let i=0; i<Math.max(actualWord.length, (typedWord? typedWord.length : 0)); i++) {
         let curColor = DEFAULT_CHAR_COLOR;
         let character = actualWord[i];
         if(i < typedWord.length) {
-            curColor = (typedWord[i] === actualWord[i] && i <= matchedIndex)? CORRECT_CHAR_COLOR : INCORRECT_CHAR_COLOR;
+            curColor = (typedWord[i] === actualWord[i])? CORRECT_CHAR_COLOR : INCORRECT_CHAR_COLOR;
         }
         if(i < actualWord.length) {
             character = actualWord[i];
@@ -30,19 +26,19 @@ export function getCharacterInformation(typedWord:string, actualWord:string, mat
     return data;
 }
 
-export function getLastMatchedIndex(typedWord:string, actualWord:string) {
-    let matchedIndex = 0;
-    if(!typedWord || !actualWord) {
-        return -1;
-    }
-    while(matchedIndex < Math.min(typedWord.length, actualWord.length)) {
-        if(typedWord[matchedIndex] !== actualWord[matchedIndex]) {
-            return matchedIndex - 1;
-        }
-        matchedIndex++;
-    }
-    return matchedIndex-1; // error?
-}
+// export function getLastMatchedIndex(typedWord:string, actualWord:string) {
+//     let matchedIndex = 0;
+//     if(!typedWord || !actualWord) {
+//         return -1;
+//     }
+//     while(matchedIndex < Math.min(typedWord.length, actualWord.length)) {
+//         if(typedWord[matchedIndex] !== actualWord[matchedIndex]) {
+//             return matchedIndex - 1;
+//         }
+//         matchedIndex++;
+//     }
+//     return matchedIndex-1; // error?
+// }
 
 export function isAllowedCharacter(s: string) {
     if (s.length !== 1) return false;
@@ -94,16 +90,15 @@ export function getTypingAccuracy(typeStatistcs: TypeStatistic[]) {
         totalCorrectWords += stat.correctWordsTyped;
         totalAttemptedWords += stat.attemptedWordsTyped;
     })
-    return totalAttemptedWords === 0? 100 : totalCorrectWords / totalCorrectWords * 100;
+    return totalAttemptedWords === 0? 
+        100 : Math.round(totalCorrectWords / totalAttemptedWords * 100);
 }
 
 // words per minute
 export function getWPM(correctWordCount: number, timeTakenInMS: number | null) {
     if (timeTakenInMS === null) {
-        return "Nan";
+        return "NaN";
     }
-    const MS_IN_A_SEC = 1000;
-    const SEC_IN_A_MIN = 60;
-    const MS_IN_A_MINUTE = SEC_IN_A_MIN * MS_IN_A_SEC;
+
     return Math.ceil(correctWordCount / (timeTakenInMS / MS_IN_A_MINUTE));
 }

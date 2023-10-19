@@ -1,8 +1,8 @@
-import { getCharacterInformation, getLastMatchedIndex } from "../../lib/logic";
+import { getCharacterInformation } from "../../lib/logic";
 import { useMultiTextState } from "./MultiTextContext";
-import { TypedWord } from "./TypeText";
+import { TypedWord } from "./TypeTextSchema";
 
-export default function Text({
+export default function Word({
   typedWords,
   wordIndex,
   textIsActive,
@@ -12,33 +12,24 @@ export default function Text({
   textIsActive: boolean;
 }) {
   const multiTextState = useMultiTextState();
-  function getWord(
-    word: string,
-    correctWord: string,
-    matchedToIndex: number,
-    idx: number
-  ) {
-    const isActive = idx === wordIndex && textIsActive;
+  function getWord(word: string, correctWord: string, wordIdx: number) {
+    const isActive = wordIdx === wordIndex && textIsActive;
 
-    const wordData = getCharacterInformation(word, correctWord, matchedToIndex);
+    const wordData = getCharacterInformation(word, correctWord);
 
     const typedword =
       word.length >= correctWord.length
         ? correctWord
         : correctWord.slice(0, word.length);
-    const cursorWordData = getCharacterInformation(
-      word,
-      typedword,
-      getLastMatchedIndex(word, typedword)
-    );
+    const cursorWordData = getCharacterInformation(word, typedword);
 
     const isCorrect =
-      word === correctWord || idx >= wordIndex ? "" : "incorrect-word";
+      word === correctWord || wordIdx >= wordIndex ? "" : "incorrect-word";
 
     return (
       <div
         className="word inline-block relative pr-[2.5px]" // note that the pr is equal to the cursor's width
-        key={idx}
+        key={wordIdx}
       >
         <div className={isCorrect}>
           {wordData.map((charData, index) => {
@@ -50,7 +41,11 @@ export default function Text({
           })}
         </div>
         {isActive && (
-          <div className={multiTextState.startTyping ? "cursor-no-blink" : "cursor"}>
+          <div
+            className={
+              multiTextState.startTyping ? "cursor-no-blink" : "cursor"
+            }
+          >
             {cursorWordData.map((charData, index) => {
               return (
                 <div className={`inline-block ${charData.color}`} key={index}>
@@ -66,8 +61,8 @@ export default function Text({
 
   return (
     <div className="flex flex-wrap gap-[10px] font-robotomono text-2xl">
-      {typedWords.map((word, idx) => {
-        return getWord(word.word, word.correctWord, word.lastMatchedIndex, idx);
+      {typedWords.map((wordData, wordIdx) => {
+        return getWord(wordData.word, wordData.correctWord, wordIdx);
       })}
     </div>
   );
