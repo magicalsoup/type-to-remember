@@ -13,7 +13,7 @@ export function MultiText({ textArray }: { textArray: TextData[] }) {
       type: MultiTextContextActionTypes.INITIALIZE,
       numberOfTexts: textArray.length,
     });
-  }, [textArray]);
+  }, [textArray, multiTextDispatch]);
 
   return (
     <>

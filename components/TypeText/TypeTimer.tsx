@@ -32,7 +32,7 @@ export default function TypeTimer({
       }, 10);
       return () => clearInterval(interval);
     }
-  }, [startTime, timeInSeconds]);
+  }, [startTime, timeLimitInSeconds]);
 
   useEffect(() => {
     // if time ran out or if we have ran out of texts
@@ -46,7 +46,7 @@ export default function TypeTimer({
         elapsedTimeInMS: timeElapsedInMS,
       });
     }
-  }, [multiTextState.textIndex, multiTextState.numberOfTexts, timeElapsedInMS]);
+  }, [multiTextState.textIndex, multiTextState.numberOfTexts, timeElapsedInMS, multiTextDispatch, timeLimitInSeconds]);
   return (
     <>
       <div className="font-raleway text-xl text-lime-900 font-bold">

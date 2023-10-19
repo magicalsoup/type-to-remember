@@ -15,7 +15,7 @@ export default function CardsList() {
         cards: JSON.parse(localStorage.getItem(userPracticeListName) as string),
       });
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
@@ -26,7 +26,7 @@ export default function CardsList() {
           ))}
         </div>
         {cards.length === 0 && 
-            <div className="font-raleway text-2xl pt-24">nothing to remember, nothing to study, you're a genius!</div>
+            <div className="font-raleway text-2xl pt-24">nothing to remember, nothing to study, you&apos;re a genius!</div>
         }
       </main>
     </>

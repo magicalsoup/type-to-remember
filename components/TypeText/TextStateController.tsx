@@ -31,7 +31,7 @@ export default function TextStateController({
         isActive: false,
       };
     });
-  }, []);
+  }, [text]);
 
   const [textState, textStateDispatch] = useReducer(typedWordsReducer, {
     typedWords: initialTypedWords,
@@ -191,7 +191,7 @@ export default function TextStateController({
       type: MultiTextContextActionTypes.UPDATE_TYPE_STATISTICS,
       typeStatistic: getTypeStatistic(textState.typedWords), // TODO should fix attempts, should be everytime user types something wrong
     });
-  }, [textState.typedWords]);
+  }, [textState.typedWords, multiTextDispatch]);
 
   // check if we finished the text
   useEffect(() => {
@@ -207,7 +207,7 @@ export default function TextStateController({
         currentTextIndex: curTextIndex,
       });
     }
-  }, [textState.wordIndex, textState.activeWord, textState.typedWords]);
+  }, [textState.wordIndex, textState.activeWord, textState.typedWords, curTextIndex, initialTypedWords.length]);
 
   // update the text component whenever typedWords is changed
   useEffect(() => {
@@ -218,7 +218,7 @@ export default function TextStateController({
         textIsActive={curTextIndex === multiTextState.textIndex}
       />
     );
-  }, [textState.typedWords, textState.activeWord, multiTextState.textIndex]);
+  }, [textState.typedWords, multiTextState.textIndex, curTextIndex, textState.wordIndex]);
 
   // listen for keyboard events
   useEffect(() => {
@@ -252,7 +252,7 @@ export default function TextStateController({
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
     };
-  }, []);
+  }, [textStateDispatch]);
 
   return (
     <div className="flex flex-col w-[800px]">

@@ -2,7 +2,7 @@ import { useCardsDispatch } from "./CardsContext";
 import { v4 as uuidv4 } from "uuid";
 import { Card, CardActionTypes } from "./StudyCardSchema";
 
-export default function addCard() {
+export default function AddCard() {
     const dispatch = useCardsDispatch();
     return (
         <div className="pr-3">
