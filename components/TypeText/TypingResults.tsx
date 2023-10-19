@@ -17,11 +17,11 @@ export default function TypingResults({texts} : {
     const wordsPerMinute = getWPM(correctWordCount, timeTakenInMS);
 
     // need total words typed
-    console.log("[correctWordCount] [timeTakeInMs]", correctWordCount, timeTakenInMS);
+    // console.log("[correctWordCount] [timeTakeInMs]", correctWordCount, timeTakenInMS);
     // console.log(timeTakenInSeconds);
    
     return (
-        <div className="flex flex-col justify-center items-center h-screen w-full">
+        <div className="flex flex-col justify-center items-center py-16 max-h-screen w-full">
             <div className="flex flex-col w-3/5 max-w-[1284px] gap-y-16">
                 <div className="font-raleway text-4xl">
                     Your Results

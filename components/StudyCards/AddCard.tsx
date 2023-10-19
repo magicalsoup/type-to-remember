@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Card, useCardsDispatch } from "./CardsContext";
+import { useCardsDispatch } from "./CardsContext";
 import { v4 as uuidv4 } from "uuid";
+import { Card, CardActionTypes } from "./StudyCardSchema";
 
 export default function addCard() {
     const dispatch = useCardsDispatch();
@@ -8,14 +8,13 @@ export default function addCard() {
         <div className="pr-3">
             <button className=""
                 onClick={()=> {
-                const blankCard: Card = {
-                    id: uuidv4(),
-                    title: "",
-                    text: "",
-                }
-                console.log("new card id", blankCard.id);
+                    const blankCard: Card = {
+                        id: uuidv4(),
+                        title: null,
+                        text: null,
+                    }
                     dispatch({
-                    type: 'added',
+                    type: CardActionTypes.ADD_CARD,
                     card: blankCard
                 });
             }}>
@@ -24,5 +23,3 @@ export default function addCard() {
         </div>
     )
 }
-
-let nextId = 1;

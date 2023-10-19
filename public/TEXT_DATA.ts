@@ -5,7 +5,7 @@ export const TEXT_DATA = [
     },
     {
         title: "(ET)",
-        text: "There exists a infinite number of primes",
+        text: "There exists an infinite number of primes",
     },
     {
         title: "(UFT)", 

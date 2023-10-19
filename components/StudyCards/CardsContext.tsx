@@ -1,16 +1,5 @@
 import { Dispatch, createContext, useContext, useReducer } from "react";
-
-export interface Card {
-    id: string;
-    title?: string;
-    text?: string; 
-}
-
-export interface CardAction {
-    type: string;
-    card?: Card;
-    cards?: Card[];
-}
+import { Card, CardAction, CardActionTypes } from "./StudyCardSchema";
 
 const initialCards: Card[] = [];
 
@@ -52,7 +41,7 @@ export function useCardsDispatch() {
 
 function cardsReducer(cards: Card[], action: CardAction) {
     switch(action.type) {
-        case 'added': {
+        case CardActionTypes.ADD_CARD: {
             const newCard = action.card;
             if (newCard) {
                 const newCards = [...cards, newCard];
@@ -60,7 +49,7 @@ function cardsReducer(cards: Card[], action: CardAction) {
             }
             return cards;
         }
-        case 'changed': {
+        case CardActionTypes.CHANGE_CARD: {
             const changedCard = action.card;
             if (changedCard) {
                 const newCards = cards.map((card) => card.id === changedCard.id? changedCard : card);
@@ -68,7 +57,7 @@ function cardsReducer(cards: Card[], action: CardAction) {
             }
             return cards;
         }
-        case 'deleted': {
+        case CardActionTypes.DELETE_CARD: {
             const deletedCard = action.card;
             if (deletedCard) {
                 const newCards = cards.filter((card) => card.id !== deletedCard.id);
@@ -76,7 +65,7 @@ function cardsReducer(cards: Card[], action: CardAction) {
             }
             return cards;
         }
-        case 'set': {
+        case CardActionTypes.SET_CARDS: {
             if (action.cards) {
                 return action.cards;
             }
