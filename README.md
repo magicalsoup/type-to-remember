@@ -13,5 +13,5 @@ You can view the project at: https://typetoremember.vercel.app/
 ## Whats next
 - include latex preview (to see how the latex commands render in real time)
 - more statistic graphs, maybe incoporate some AI to analyze data collected.
-- redo design and revamp the UI
-- allow users to add text from UI rather from manually adding to files
+- ~~redo design and revamp the UI~~ (done!)
+- ~~allow users to add text from UI rather from manually adding to files~~ (done!)
