@@ -1,5 +1,9 @@
 import { TypedWord, TypeStatistic } from "../components/TypeText/TypeTextSchema";
-import { CORRECT_CHAR_COLOR, DEFAULT_CHAR_COLOR, INCORRECT_CHAR_COLOR, MS_IN_A_MINUTE } from "./constants";
+import { MS_IN_A_MINUTE } from "./constants";
+
+const INCORRECT_CHAR_COLOR = "text-rose-500";
+const CORRECT_CHAR_COLOR = "text-emerald-800";
+const DEFAULT_CHAR_COLOR = "text-gray-500";
 
 export function getCharacterInformation(typedWord:string, actualWord:string) {
     let data = [];
